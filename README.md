@@ -1,2 +1,3 @@
 # next-move
-Spin the wheel. Get ideas.
+A themed idea generator — spin a wheel to get a business idea or something to do today
+Next Move is a casino-themed website that helps people land on their next idea instead of staring at a blank page. Visitors pick what they’re looking for — a business idea, something to do today, or a surprise — answer two or three quick questions about their time, interests, or energy, then spin a wheel to get a specific, personalized suggestion. Each visitor gets two free spins; after that, they can buy five more spins for $1 through an embedded Stripe checkout that never leaves the page. Spin balances and payments are handled by a small serverless backend (deployed on Vercel) with Stripe webhooks confirming each purchase before spins are credited, so the payment flow is real and secure rather than simulated.
