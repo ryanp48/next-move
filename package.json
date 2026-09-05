@@ -5,6 +5,6 @@
   "description": "Next Move — idea wheel with real Stripe-powered paid spins",
   "dependencies": {
     "stripe": "^16.0.0",
-    "@vercel/kv": "^1.0.1"
+    "redis": "^4.6.13"
   }
 }
