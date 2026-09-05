@@ -1,14 +1,7 @@
-// Stripe calls this endpoint directly (not the browser) once a payment
-// finishes. This is the ONLY place spins get credited for a purchase —
-// never credit spins from the front-end's "success" callback alone, since
-// that can be spoofed or interrupted.
-
 const Stripe = require('stripe');
-const { kv } = require('@vercel/kv');
+const { withRedis } = require('./lib/redis');
 const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Vercel needs the raw request body to verify the Stripe signature,
-// so body parsing must be disabled for this route.
 module.exports.config = {
   api: { bodyParser: false }
 };
@@ -41,9 +34,11 @@ module.exports = async (req, res) => {
     const spinCount = parseInt((intent.metadata && intent.metadata.spinCount) || '5', 10);
 
     if (visitorId) {
-      const key = `paid:${visitorId}`;
-      const current = (await kv.get(key)) || 0;
-      await kv.set(key, current + spinCount);
+      await withRedis(async (client) => {
+        const key = `paid:${visitorId}`;
+        const current = parseInt((await client.get(key)) || '0', 10);
+        await client.set(key, String(current + spinCount));
+      });
     } else {
       console.warn('payment_intent.succeeded with no visitorId in metadata', intent.id);
     }
