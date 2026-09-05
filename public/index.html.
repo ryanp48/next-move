@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Next Move — spin for your next move</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,900&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://js.stripe.com/v3/"></script>
+<style>
+  :root{
+    --bg:#0A2318;
+    --felt:#0F3324;
+    --surface:#12301F;
+    --surface-2:#1B4130;
+    --gold:#D9AE3F;
+    --gold-bright:#F0C94A;
+    --red:#9A1B33;
+    --cream:#F5EDE0;
+    --cream-dim:#B9C4B4;
+    --radius:18px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background-color:var(--bg);
+    background-image:
+      radial-gradient(ellipse at 50% 35%, transparent 30%, rgba(0,0,0,0.55) 100%),
+      repeating-linear-gradient(45deg, rgba(217,174,63,0.05) 0px, rgba(217,174,63,0.05) 1px, transparent 1px, transparent 24px),
+      repeating-linear-gradient(-45deg, rgba(217,174,63,0.05) 0px, rgba(217,174,63,0.05) 1px, transparent 1px, transparent 24px),
+      radial-gradient(ellipse at 15% -10%, rgba(217,174,63,0.14), transparent 50%),
+      radial-gradient(ellipse at 110% 110%, rgba(154,27,51,0.22), transparent 55%),
+      radial-gradient(ellipse at 50% 50%, var(--felt), var(--bg) 75%);
+    color:var(--cream);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    -webkit-font-smoothing:antialiased;
+  }
+  .marquee-bar{
+    width:100%;
+    height:4px;
+    background:linear-gradient(90deg, var(--red), var(--gold-bright), var(--red));
+  }
+  .marquee-dots{
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    margin:2px 0 26px;
+  }
+  .marquee-dots span{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--gold-bright);
+    box-shadow:0 0 6px rgba(240,201,74,0.85);
+    opacity:0.85;
+  }
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  .wrap{
+    width:100%;
+    max-width:640px;
+    padding:28px 20px 60px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+
+  header.top{
+    width:100%;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:8px;
+  }
+  .brand{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:13px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--cream-dim);
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .brand .dot{
+    width:20px;height:20px;border-radius:50%;
+    display:inline-flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle at 35% 30%, var(--gold-bright), var(--gold) 70%);
+    box-shadow:0 0 10px rgba(217,174,63,0.7);
+    color:#241804;
+    font-size:12px;
+    line-height:1;
+  }
+  .tokens{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    color:var(--cream-dim);
+    border:1px solid rgba(217,174,63,0.35);
+    background:rgba(217,174,63,0.06);
+    padding:6px 13px;
+    border-radius:100px;
+    letter-spacing:0.04em;
+  }
+  .tokens b{color:var(--gold-bright); font-weight:600;}
+
+  .hero-title{
+    font-family:'Fraunces',serif;
+    font-weight:900;
+    font-size:clamp(34px,7vw,52px);
+    line-height:1.02;
+    text-align:center;
+    margin:22px 0 6px;
+    letter-spacing:-0.01em;
+  }
+  .hero-title em{
+    font-style:italic;
+    background:linear-gradient(120deg, var(--gold) 10%, var(--gold-bright) 50%, var(--gold) 90%);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+  }
+  .hero-sub{
+    text-align:center;
+    color:var(--cream-dim);
+    font-size:15.5px;
+    max-width:420px;
+    margin:0 0 30px;
+    line-height:1.5;
+  }
+
+  .card{
+    width:100%;
+    background:linear-gradient(180deg, rgba(27,65,48,0.9), rgba(18,48,31,0.95));
+    border:1px solid rgba(217,174,63,0.28);
+    border-radius:var(--radius);
+    padding:26px;
+    box-shadow:0 20px 55px -20px rgba(0,0,0,0.65), 0 0 0 1px rgba(0,0,0,0.2) inset;
+  }
+
+  /* ---- step: mode select ---- */
+  .mode-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:12px;
+  }
+  .mode-btn{
+    text-align:left;
+    background:var(--surface-2);
+    border:1px solid rgba(217,174,63,0.16);
+    border-radius:14px;
+    padding:18px 20px;
+    color:var(--cream);
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    transition:border-color .18s ease, transform .12s ease, background .18s ease;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:14px;
+  }
+  .mode-btn:hover{border-color:var(--gold); transform:translateY(-1px);}
+  .mode-btn .m-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:19px;
+    margin-bottom:3px;
+  }
+  .mode-btn .m-sub{
+    color:var(--cream-dim);
+    font-size:13.5px;
+  }
+  .mode-btn .suit-chip{
+    width:38px;height:38px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, #1F150A, #0E0A05 75%);
+    border:2px solid var(--gold);
+    color:var(--gold-bright);
+    font-size:17px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    flex-shrink:0;
+    box-shadow:inset 0 0 0 2px rgba(217,174,63,0.15);
+  }
+
+  /* ---- step: quiz ---- */
+  .progress{
+    display:flex;
+    gap:6px;
+    margin-bottom:20px;
+  }
+  .progress span{
+    height:4px;
+    flex:1;
+    border-radius:4px;
+    background:rgba(217,174,63,0.15);
+    overflow:hidden;
+  }
+  .progress span i{
+    display:block;
+    height:100%;
+    width:0%;
+    background:var(--gold);
+    transition:width .3s ease;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:0.12em;
+    text-transform:uppercase;
+    color:var(--gold);
+    margin-bottom:10px;
+  }
+  .q-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:24px;
+    margin:0 0 18px;
+    line-height:1.2;
+  }
+  .opt-grid{display:flex; flex-direction:column; gap:10px;}
+  .opt-btn{
+    background:var(--surface-2);
+    border:1px solid rgba(217,174,63,0.14);
+    border-radius:12px;
+    padding:14px 16px;
+    color:var(--cream);
+    text-align:left;
+    cursor:pointer;
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    transition:border-color .15s ease, background .15s ease;
+  }
+  .opt-btn:hover{border-color:var(--gold); background:#20503A;}
+  .back-link{
+    margin-top:16px;
+    background:none;
+    border:none;
+    color:var(--cream-dim);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    letter-spacing:.04em;
+    cursor:pointer;
+    padding:4px 0;
+  }
+  .back-link:hover{color:var(--cream);}
+
+  /* ---- step: wheel ---- */
+  .wheel-stage{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    width:100%;
+  }
+  .wheel-holder{
+    position:relative;
+    width:min(320px,78vw);
+    height:min(320px,78vw);
+    margin:6px 0 22px;
+  }
+  .pointer{
+    position:absolute;
+    top:-16px;
+    left:50%;
+    transform:translateX(-50%);
+    width:0; height:0;
+    border-left:13px solid transparent;
+    border-right:13px solid transparent;
+    border-top:24px solid var(--gold-bright);
+    z-index:5;
+    filter:drop-shadow(0 3px 5px rgba(0,0,0,0.5));
+  }
+  .pointer::after{
+    content:'';
+    position:absolute;
+    top:-24px; left:-13px;
+    width:26px; height:26px;
+  }
+  .wheel{
+    width:100%;
+    height:100%;
+    border-radius:50%;
+    position:relative;
+    transition:transform 3.2s cubic-bezier(.17,.89,.32,1.02);
+    will-change:transform;
+    filter:drop-shadow(0 22px 40px rgba(0,0,0,0.55));
+  }
+  .wheel svg{ display:block; width:100%; height:100%; }
+
+  .spin-btn{
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    font-size:14px;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#241804;
+    border:none;
+    padding:15px 34px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease, opacity .2s ease;
+    box-shadow:0 12px 26px -8px rgba(217,174,63,0.65);
+  }
+  .spin-btn:hover:not(:disabled){transform:translateY(-2px);}
+  .spin-btn:disabled{opacity:0.4; cursor:not-allowed; box-shadow:none;}
+
+  .buy-row{
+    margin-top:14px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+  }
+  .buy-btn{
+    background:rgba(154,27,51,0.16);
+    border:1px solid var(--red);
+    color:var(--cream);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:.03em;
+    padding:9px 16px;
+    border-radius:100px;
+    cursor:pointer;
+    transition:background .15s ease;
+  }
+  .buy-btn:hover{background:rgba(154,27,51,0.32);}
+  .demo-note{
+    font-size:11px;
+    color:var(--cream-dim);
+    opacity:0.75;
+    text-align:center;
+  }
+
+  /* ---- payment modal ---- */
+  .modal-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(5,10,7,0.72);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    z-index:100;
+  }
+  .modal-card{
+    width:100%;
+    max-width:400px;
+    background:linear-gradient(180deg, #17402C, #0F2A1C);
+    border:1px solid rgba(217,174,63,0.4);
+    border-radius:18px;
+    padding:24px;
+    box-shadow:0 30px 70px -20px rgba(0,0,0,0.75);
+  }
+  .modal-title{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:20px;
+    margin:0 0 4px;
+  }
+  .modal-sub{
+    font-size:13px;
+    color:var(--cream-dim);
+    margin:0 0 18px;
+  }
+  #paymentElement{
+    margin-bottom:16px;
+  }
+  .modal-actions{
+    display:flex;
+    gap:10px;
+  }
+  .pay-btn{
+    flex:1;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#241804;
+    border:none;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    font-size:12.5px;
+    padding:13px 18px;
+    border-radius:100px;
+    cursor:pointer;
+  }
+  .pay-btn:disabled{opacity:.5; cursor:not-allowed;}
+  .cancel-btn{
+    background:none;
+    border:1px solid rgba(237,232,220,0.25);
+    color:var(--cream-dim);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    padding:13px 18px;
+    border-radius:100px;
+    cursor:pointer;
+  }
+  .modal-error{
+    color:#F0A0A0;
+    font-size:12.5px;
+    margin:0 0 12px;
+    min-height:0;
+  }
+
+  /* ---- result ---- */
+  .result{
+    width:100%;
+    margin-top:24px;
+    padding-top:22px;
+    border-top:1px solid rgba(217,174,63,0.2);
+    animation:rise .5s ease both;
+  }
+  @keyframes rise{
+    from{opacity:0; transform:translateY(14px);}
+    to{opacity:1; transform:translateY(0);}
+  }
+  .flavor-tag{
+    display:inline-block;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:0.1em;
+    text-transform:uppercase;
+    color:#241804;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    padding:4px 10px;
+    border-radius:6px;
+    margin-bottom:12px;
+  }
+  .idea-title{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:23px;
+    margin:0 0 10px;
+    line-height:1.2;
+  }
+  .idea-desc{
+    font-size:15.5px;
+    line-height:1.55;
+    color:#E6E0D2;
+    margin:0 0 10px;
+  }
+  .idea-twist{
+    font-size:14px;
+    line-height:1.5;
+    color:var(--cream-dim);
+    border-left:2px solid var(--red);
+    padding-left:12px;
+    margin:14px 0;
+  }
+  .idea-meta{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11.5px;
+    color:var(--cream-dim);
+    letter-spacing:.02em;
+    margin-bottom:20px;
+  }
+  .result-actions{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .again-btn{
+    flex:1;
+    min-width:140px;
+    background:linear-gradient(180deg, var(--gold-bright), var(--gold));
+    color:#241804;
+    border:none;
+    font-family:'IBM Plex Mono',monospace;
+    font-weight:600;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    font-size:12.5px;
+    padding:13px 18px;
+    border-radius:100px;
+    cursor:pointer;
+  }
+  .again-btn:disabled{opacity:0.4; cursor:not-allowed;}
+  .start-over-btn{
+    background:none;
+    border:1px solid rgba(217,174,63,0.35);
+    color:var(--cream-dim);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:.03em;
+    padding:13px 18px;
+    border-radius:100px;
+    cursor:pointer;
+  }
+
+  .toast{
+    position:fixed;
+    bottom:22px;
+    left:50%;
+    transform:translateX(-50%) translateY(10px);
+    background:var(--surface-2);
+    border:1px solid var(--gold);
+    color:var(--cream);
+    padding:12px 18px;
+    border-radius:12px;
+    font-size:13px;
+    font-family:'Inter',sans-serif;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    max-width:88vw;
+    text-align:center;
+    z-index:50;
+  }
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+
+  footer{
+    margin-top:26px;
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    color:var(--cream-dim);
+    opacity:.6;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+<div class="marquee-bar"></div>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><span class="dot">♠</span>NEXT MOVE</div>
+    <div class="tokens" id="tokenDisplay">2 <span style="opacity:.7">free spins</span></div>
+  </header>
+
+  <h1 class="hero-title" id="heroTitle">Spin for your <em>next move</em>.</h1>
+  <p class="hero-sub" id="heroSub">Answer a couple quick things. Pull the wheel. Get an actual idea — not a blank page.</p>
+  <div class="marquee-dots">
+    <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+  </div>
+
+  <div class="card" id="cardArea"></div>
+
+  <footer>Payments processed securely by Stripe.</footer>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- DATA ---------------- */
+
+const BIZ_IDEAS = {
+  making: [
+    {t:"Small-Batch Candle Co.", d:"Pour small-batch candles in scents tied to local landmarks or seasons, and sell direct through markets and Instagram."},
+    {t:"Custom Furniture Pieces", d:"Build made-to-order furniture around one wood and one clear style, sold through word of mouth and local design accounts."},
+    {t:"Ceramics Drop Club", d:"Throw a small run of mugs or bowls each month and sell it as a limited drop instead of holding big inventory."},
+    {t:"Repair & Restoration", d:"Specialize in fixing one category people would rather repair than replace — bikes, furniture, leather goods."},
+    {t:"Handmade Goods Kits", d:"Package the materials and instructions for something you're good at making, so customers can make it themselves."}
+  ],
+  helping: [
+    {t:"Errand & Task Concierge", d:"Handle the small tasks busy people never get to — returns, appointments, pickups — priced by the hour or the task."},
+    {t:"Move-In Setup Service", d:"Help new residents unpack, furnish, and settle into a home in a day, priced as one flat-rate package."},
+    {t:"Senior Tech Help", d:"Offer patient, in-home tech support for older adults — phones, Wi-Fi, video calls — billed by the visit."},
+    {t:"Pet Care Micro-Business", d:"Offer dog walking, drop-in visits, or overnight sitting in your neighborhood, building a regular client roster."},
+    {t:"Event Day-Of Coordinator", d:"Run logistics on the actual day of small events — birthdays, showers, pop-ups — so hosts can just show up."}
+  ],
+  numbers: [
+    {t:"Bookkeeping for Micro-Businesses", d:"Handle monthly books for solo founders and small shops too busy — or too unsure — to do it themselves."},
+    {t:"Pricing Audits", d:"Help small businesses review and fix their pricing, taking a cut of the margin improvement you find."},
+    {t:"Spreadsheet Systems Shop", d:"Build and sell ready-made spreadsheet templates — budgets, trackers, planners — for one specific audience."},
+    {t:"Inventory Tightening Service", d:"Audit small retailers' inventory and ordering habits to cut waste and free up cash."},
+    {t:"Subscription Audit Service", d:"Help people find and cancel subscriptions they're quietly overpaying for, for a share of the savings."}
+  ],
+  words: [
+    {t:"Niche Newsletter", d:"Write a focused newsletter for one very specific audience, and monetize with sponsors once you have real readers."},
+    {t:"Ghostwriting for Founders", d:"Write LinkedIn posts or blog content for busy founders who have the ideas but not the time to write."},
+    {t:"Local Storytelling Service", d:"Interview and write short profiles of local business owners or old-timers, sold as keepsakes or content packages."},
+    {t:"Course Script Writer", d:"Write scripts and outlines for creators launching online courses who are strong on camera but weak on structure."},
+    {t:"Micro-Copy Studio", d:"Specialize in the small but high-stakes writing — error messages, onboarding, checkout flows — teams rush through."}
+  ],
+  food: [
+    {t:"Meal Prep Drop-Off", d:"Cook a rotating weekly menu and deliver ready-to-eat meals to a small list of regular local customers."},
+    {t:"Specialty Sauce or Snack Line", d:"Perfect one sauce, spice blend, or snack, and sell it at markets and small shops before going wider."},
+    {t:"Pop-Up Supper Club", d:"Host a themed dinner in your home or a borrowed space once a month, selling tickets in advance."},
+    {t:"Baked Goods Subscription", d:"Offer a weekly drop of one excellent baked good, picked up at a fixed time and place."},
+    {t:"Cooking Classes for Beginners", d:"Teach small, hands-on classes for one specific dish or skill people are always asking how to do."}
+  ],
+  tech: [
+    {t:"Simple Tool for a Specific Job", d:"Build one small, focused app or spreadsheet that solves a single annoying problem for a specific type of worker."},
+    {t:"No-Code Setup Service", d:"Help small businesses set up the no-code tools — booking, CRM, automations — they've been meaning to but haven't."},
+    {t:"Local Business Website Sprints", d:"Offer fast, fixed-price, one-week website builds for local businesses still running outdated sites."},
+    {t:"Browser Extension for a Niche", d:"Build a small browser extension that fixes one annoyance for a specific group of power users."},
+    {t:"Automation Consulting", d:"Audit a small business's repetitive manual work and set up simple automations to save them hours a week."}
+  ]
+};
+
+const BIZ_FLAVORS = ["Recurring Revenue","Hyper-Local","Online-Only","Weekend Launch","Sell to Businesses","Team Up","Subscription Twist","Go Weird"];
+const BIZ_FLAVORS_SHORT = ["RECURRING","LOCAL","ONLINE","WEEKEND","B2B","TEAM UP","SUBSCRIBE","GO WEIRD"];
+const BIZ_TWISTS = {
+  "Recurring Revenue":"Turn it into a subscription so people pay every month instead of once.",
+  "Hyper-Local":"Keep it hyper-local — one neighborhood, real relationships, word of mouth.",
+  "Online-Only":"Skip the storefront. Build it entirely online — sell, deliver, and support digitally.",
+  "Weekend Launch":"Launch a bare-bones version this weekend and improve it once real customers show up.",
+  "Sell to Businesses":"Pitch it to businesses instead of consumers — fewer customers, bigger checks.",
+  "Team Up":"Find one partner to split the work and double the momentum.",
+  "Subscription Twist":"Add a membership or box layer on top of the core idea.",
+  "Go Weird":"Push the concept further than feels comfortable — the weird version is more memorable."
+};
+
+const TODAY_CATEGORIES = ["Get Outside","Make Something","Learn Something","Connect","Treat Yourself","Move Your Body","Tidy & Reset","Small Adventure"];
+const TODAY_CATEGORIES_SHORT = ["OUTSIDE","MAKE","LEARN","CONNECT","TREAT","MOVE","TIDY","ADVENTURE"];
+const TODAY_IDEAS = {
+  "Get Outside":[
+    "Take a walk somewhere in your city you've never actually explored on foot.",
+    "Find the nearest body of water and just sit by it for twenty minutes.",
+    "Go people-watch at the busiest café or park you can find.",
+    "Take your coffee outside and eat breakfast somewhere with a view.",
+    "Go for a run or bike ride on a route you've never tried."
+  ],
+  "Make Something":[
+    "Cook a dish you've never made before, using only what's already in your kitchen.",
+    "Sketch or doodle for fifteen minutes with zero pressure to make it good.",
+    "Rearrange one room to feel completely different.",
+    "Write a short letter to someone you haven't talked to in a while — actually send it.",
+    "Fix the one small broken thing you've been ignoring for weeks."
+  ],
+  "Learn Something":[
+    "Pick a topic you know nothing about and go down a research rabbit hole for an hour.",
+    "Watch a documentary on something totally outside your usual interests.",
+    "Learn to say ten phrases in a language you don't speak.",
+    "Read up on whatever's currently trending and follow every interesting thread.",
+    "Try a tutorial for a skill you've always meant to pick up."
+  ],
+  "Connect":[
+    "Call, don't text, one friend you haven't talked to in a month.",
+    "Invite someone over for a low-key coffee or dinner — no occasion needed.",
+    "Write down three specific things you appreciate about someone and tell them today.",
+    "Reach out to an old coworker or classmate just to catch up.",
+    "Plan a small get-together for next weekend, right now, before you talk yourself out of it."
+  ],
+  "Treat Yourself":[
+    "Book the massage, haircut, or small thing you keep putting off.",
+    "Buy yourself the good version of something you usually get cheap.",
+    "Take yourself out to a meal alone — no phone, no rush.",
+    "Take a long, unhurried bath or shower with actual music playing.",
+    "Spend an hour doing the hobby you never make time for."
+  ],
+  "Move Your Body":[
+    "Do a workout you actually enjoy, not the one you think you should do.",
+    "Stretch for fifteen minutes while watching something you like.",
+    "Try a new class — dance, climbing, yoga — you've been curious about.",
+    "Take the stairs, the long way, and the scenic route all day today.",
+    "Put on music and just move for ten minutes, no structure required."
+  ],
+  "Tidy & Reset":[
+    "Clear out one drawer or shelf that's been bothering you.",
+    "Do a 20-minute speed clean of the room you spend the most time in.",
+    "Unsubscribe from ten emails you never read.",
+    "Sort one pile of 'I'll deal with it later' into done or gone.",
+    "Make your bed properly and see how it changes the whole room."
+  ],
+  "Small Adventure":[
+    "Get on transit or in the car and get off somewhere you've never been.",
+    "Try the restaurant or shop you always pass but never enter.",
+    "Say yes to the first spontaneous suggestion someone gives you today.",
+    "Pick a direction and explore for an hour with no destination in mind.",
+    "Do one thing today that mildly scares you in a good way."
+  ]
+};
+
+/* ---------------- CONFIG ---------------- */
+
+// TODO: replace with your real Stripe publishable key (starts with pk_live_ or pk_test_)
+const STRIPE_PUBLISHABLE_KEY = "pk_test_REPLACE_ME";
+const API_BASE = ""; // same-origin: leave blank when the API routes live under /api on this deployment
+
+function getVisitorId(){
+  let id = localStorage.getItem('nm_visitor');
+  if(!id){
+    id = (crypto.randomUUID ? crypto.randomUUID() : 'v-' + Date.now() + '-' + Math.random().toString(16).slice(2));
+    localStorage.setItem('nm_visitor', id);
+  }
+  return id;
+}
+const VISITOR_ID = getVisitorId();
+let stripe = null;
+let stripeElements = null;
+
+/* ---------------- STATE ---------------- */
+
+const state = {
+  mode: null,
+  step: 'mode',
+  qIndex: 0,
+  answers: {},
+  freeRemaining: 2,
+  paidSpins: 0,
+  everSpun: false,
+  spinning: false,
+  rotation: 0,
+  lastIndex: null,
+  statusLoaded: false
+};
+
+function totalSpins(){
+  return state.freeRemaining + state.paidSpins;
+}
+
+async function refreshStatus(){
+  try{
+    const res = await fetch(`${API_BASE}/api/status?visitorId=${encodeURIComponent(VISITOR_ID)}`);
+    const data = await res.json();
+    state.freeRemaining = data.freeRemaining;
+    state.paidSpins = data.paidSpins;
+    state.statusLoaded = true;
+  } catch(err){
+    console.error('Could not load spin balance', err);
+  }
+  updateTokenDisplay();
+}
+
+const BIZ_QUESTIONS = [
+  {key:'time', title:"How much time can you give it?", options:["Nights & weekends","A few hours a week","All in, full-time"]},
+  {key:'interest', title:"What pulls you in?", options:[
+    ["Making things","making"],["Helping people","helping"],["Numbers & systems","numbers"],
+    ["Words & ideas","words"],["Food & taste","food"],["Tech & tools","tech"]
+  ]},
+  {key:'budget', title:"Starting budget?", options:["Under $100","$100–$1,000","$1,000+"]}
+];
+
+const TODAY_QUESTIONS = [
+  {key:'time', title:"How much time do you have?", options:["30 minutes","A few hours","All day"]},
+  {key:'energy', title:"What's your energy?", options:["Low-key","Normal","Ready to move"]},
+  {key:'social', title:"Solo or with people?", options:["Solo","With others"]}
+];
+
+/* ---------------- HELPERS ---------------- */
+
+const el = id => document.getElementById(id);
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+
+function showToast(msg){
+  const t = el('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 2600);
+}
+
+function updateTokenDisplay(){
+  const d = el('tokenDisplay');
+  const total = totalSpins();
+  if(!state.everSpun && state.paidSpins === 0){
+    d.innerHTML = `<b>${state.freeRemaining}</b> <span style="opacity:.7">free spin${state.freeRemaining===1?'':'s'}</span>`;
+  } else if(total<=0){
+    d.innerHTML = `<b>0</b> spins left`;
+  } else {
+    d.innerHTML = `<b>${total}</b> spin${total===1?'':'s'} left`;
+  }
+}
+
+/* ---------------- RENDER: MODE SELECT ---------------- */
+
+function renderMode(){
+  el('heroTitle').innerHTML = `Spin for your <em>next move</em>.`;
+  el('heroSub').textContent = `Answer a couple quick things. Pull the wheel. Get an actual idea — not a blank page.`;
+  el('cardArea').innerHTML = `
+    <div class="mode-grid">
+      <button class="mode-btn" data-mode="biz">
+        <div><div class="m-title">A business idea</div><div class="m-sub">For your next side hustle or startup</div></div>
+        <div class="suit-chip">♠</div>
+      </button>
+      <button class="mode-btn" data-mode="today">
+        <div><div class="m-title">Something to do today</div><div class="m-sub">For when today feels blank</div></div>
+        <div class="suit-chip">♥</div>
+      </button>
+      <button class="mode-btn" data-mode="surprise">
+        <div><div class="m-title">Surprise me</div><div class="m-sub">Skip the questions, straight to the wheel</div></div>
+        <div class="suit-chip">♦</div>
+      </button>
+    </div>
+  `;
+  document.querySelectorAll('.mode-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      state.mode = b.dataset.mode;
+      state.answers = {};
+      state.qIndex = 0;
+      state.lastIndex = null;
+      if(state.mode === 'surprise'){
+        state.step = 'wheel';
+        renderWheel();
+      } else {
+        state.step = 'quiz';
+        renderQuiz();
+      }
+    });
+  });
+}
+
+/* ---------------- RENDER: QUIZ ---------------- */
+
+function renderQuiz(){
+  const questions = state.mode === 'biz' ? BIZ_QUESTIONS : TODAY_QUESTIONS;
+  const q = questions[state.qIndex];
+
+  el('heroTitle').innerHTML = state.mode === 'biz' ? `Let's shape the <em>idea</em>.` : `Let's shape the <em>day</em>.`;
+  el('heroSub').textContent = `Quick — just ${questions.length} questions.`;
+
+  const dots = questions.map((_,i)=>`<span><i style="width:${i<state.qIndex?'100':(i===state.qIndex?'40':'0')}%"></i></span>`).join('');
+
+  const optsHtml = q.options.map(opt=>{
+    const label = Array.isArray(opt) ? opt[0] : opt;
+    const value = Array.isArray(opt) ? opt[1] : opt;
+    return `<button class="opt-btn" data-value="${value}">${label}</button>`;
+  }).join('');
+
+  el('cardArea').innerHTML = `
+    <div class="progress">${dots}</div>
+    <div class="eyebrow">Question ${state.qIndex+1} of ${questions.length}</div>
+    <h2 class="q-title">${q.title}</h2>
+    <div class="opt-grid">${optsHtml}</div>
+    ${state.qIndex>0 ? `<button class="back-link" id="backBtn">← back</button>` : `<button class="back-link" id="backBtn">← start over</button>`}
+  `;
+
+  document.querySelectorAll('.opt-btn').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      state.answers[q.key] = b.dataset.value;
+      if(state.qIndex < questions.length-1){
+        state.qIndex++;
+        renderQuiz();
+      } else {
+        state.step = 'wheel';
+        renderWheel();
+      }
+    });
+  });
+
+  el('backBtn').addEventListener('click', ()=>{
+    if(state.qIndex>0){ state.qIndex--; renderQuiz(); }
+    else { state.step='mode'; renderMode(); }
+  });
+}
+
+/* ---------------- RENDER: WHEEL ---------------- */
+
+function currentSegments(){
+  if(state.mode === 'biz') return BIZ_FLAVORS;
+  return TODAY_CATEGORIES;
+}
+function currentShortSegments(){
+  if(state.mode === 'biz') return BIZ_FLAVORS_SHORT;
+  return TODAY_CATEGORIES_SHORT;
+}
+
+function buildWheelSVG(){
+  const fullSegs = currentSegments();
+  const shortSegs = currentShortSegments();
+  const n = fullSegs.length;
+  const anglePer = 360/n;
+  const cx=150, cy=150, r=140;
+  const toRad = d => d*Math.PI/180;
+
+  let paths = '';
+  let labels = '';
+
+  for(let i=0;i<n;i++){
+    const a0 = i*anglePer;
+    const a1 = (i+1)*anglePer;
+    const mid = a0 + anglePer/2;
+
+    const x0 = cx + r*Math.sin(toRad(a0));
+    const y0 = cy - r*Math.cos(toRad(a0));
+    const x1 = cx + r*Math.sin(toRad(a1));
+    const y1 = cy - r*Math.cos(toRad(a1));
+
+    const color = i % 2 === 0 ? '#15130F' : '#9A1B33';
+    paths += `<path d="M ${cx} ${cy} L ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 0 1 ${x1.toFixed(2)} ${y1.toFixed(2)} Z" fill="${color}" stroke="#D9AE3F" stroke-width="1.5"/>`;
+
+    const labelR = r*0.63;
+    const lx = cx + labelR*Math.sin(toRad(mid));
+    const ly = cy - labelR*Math.cos(toRad(mid));
+    const rot = mid;
+
+    labels += `<text x="${lx.toFixed(2)}" y="${ly.toFixed(2)}" transform="rotate(${rot.toFixed(2)} ${lx.toFixed(2)} ${ly.toFixed(2)})" text-anchor="middle" dominant-baseline="middle" fill="#F5EDE0" font-family="IBM Plex Mono, monospace" font-weight="600" font-size="13">${shortSegs[i]}</text>`;
+  }
+
+  return `<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="150" cy="150" r="147" fill="none" stroke="#D9AE3F" stroke-width="5"/>
+    <circle cx="150" cy="150" r="141" fill="none" stroke="#241804" stroke-width="1"/>
+    ${paths}
+    ${labels}
+    <circle cx="150" cy="150" r="27" fill="#15130F" stroke="#D9AE3F" stroke-width="3"/>
+    <circle cx="150" cy="150" r="15" fill="#9A1B33" stroke="#D9AE3F" stroke-width="2"/>
+  </svg>`;
+}
+
+function buildWheelMarkup(){
+  return `
+    <div class="wheel-holder">
+      <div class="pointer"></div>
+      <div class="wheel" id="wheelEl" style="transform:rotate(${state.rotation}deg);">
+        ${buildWheelSVG()}
+      </div>
+    </div>
+  `;
+}
+
+function renderWheel(){
+  el('heroTitle').innerHTML = `Give it a <em>spin</em>.`;
+  el('heroSub').textContent = `The wheel decides the angle. You decide what to do with it.`;
+
+  const total = totalSpins();
+  el('cardArea').innerHTML = `
+    <div class="wheel-stage">
+      ${buildWheelMarkup()}
+      <button class="spin-btn" id="spinBtn">${total>0 ? 'Spin the wheel' : 'Out of spins'}</button>
+      <div class="buy-row">
+        ${total<=0 ? `<button class="buy-btn" id="buyBtn">Buy 5 spins — $1</button>` : ``}
+        <div class="demo-note">2 free spins on the house · then $1 for 5 more</div>
+      </div>
+    </div>
+    <div id="resultZone"></div>
+  `;
+  updateTokenDisplay();
+  if(!state.statusLoaded) refreshStatus();
+
+  el('spinBtn').addEventListener('click', doSpin);
+  const buyBtn = el('buyBtn');
+  if(buyBtn) buyBtn.addEventListener('click', openPaymentModal);
+}
+
+async function doSpin(){
+  if(state.spinning) return;
+  if(totalSpins()<=0){ openPaymentModal(); return; }
+
+  state.spinning = true;
+  const spinBtn = el('spinBtn');
+  spinBtn.disabled = true;
+  spinBtn.textContent = 'Spinning…';
+
+  let authorized = false;
+  try{
+    const res = await fetch(`${API_BASE}/api/spin`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({visitorId: VISITOR_ID})
+    });
+    const data = await res.json();
+    if(data.ok){
+      authorized = true;
+      state.freeRemaining = data.freeRemaining;
+      state.paidSpins = data.paidSpins;
+      state.everSpun = true;
+    } else {
+      showToast("Looks like you're out of spins.");
+    }
+  } catch(err){
+    console.error(err);
+    showToast("Couldn't reach the server — try again in a moment.");
+  }
+  updateTokenDisplay();
+
+  if(!authorized){
+    state.spinning = false;
+    spinBtn.disabled = false;
+    spinBtn.textContent = totalSpins()>0 ? 'Spin the wheel' : 'Out of spins';
+    if(totalSpins()<=0) renderWheel();
+    return;
+  }
+
+  const segs = currentSegments();
+  const n = segs.length;
+  const angle = 360/n;
+  let pool = [];
+  for(let i=0;i<n;i++){ if(i !== state.lastIndex) pool.push(i); }
+  if(pool.length === 0) pool = [...Array(n).keys()];
+  const targetIndex = pool[Math.floor(Math.random()*pool.length)];
+  state.lastIndex = targetIndex;
+
+  const desiredMod = (360 - (targetIndex*angle + angle/2)) % 360;
+  const currentMod = ((state.rotation % 360) + 360) % 360;
+  let delta = (desiredMod - currentMod + 360) % 360;
+  const extraSpins = 4 + Math.floor(Math.random()*2);
+  state.rotation = state.rotation + delta + extraSpins*360;
+
+  const wheelEl = el('wheelEl');
+  wheelEl.style.transform = `rotate(${state.rotation}deg)`;
+
+  setTimeout(()=>{
+    state.spinning = false;
+    revealResult(segs[targetIndex]);
+    spinBtn.disabled = totalSpins()<=0;
+    spinBtn.textContent = totalSpins()>0 ? 'Spin again' : 'Out of spins';
+    if(totalSpins()<=0){
+      const buyRow = document.querySelector('.buy-row');
+      if(buyRow && !el('buyBtn')){
+        buyRow.innerHTML = `<button class="buy-btn" id="buyBtn">Buy 5 spins — $1</button><div class="demo-note">2 free spins on the house · then $1 for 5 more</div>`;
+        el('buyBtn').addEventListener('click', openPaymentModal);
+      }
+    }
+  }, 3300);
+}
+
+/* ---------------- PAYMENT MODAL ---------------- */
+
+async function openPaymentModal(){
+  if(!stripe){
+    if(!window.Stripe){ showToast("Payments script didn't load — check your connection."); return; }
+    if(STRIPE_PUBLISHABLE_KEY.includes('REPLACE_ME')){
+      showToast("Add your real Stripe publishable key in the code before taking live payments.");
+      return;
+    }
+    stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'payOverlay';
+  overlay.innerHTML = `
+    <div class="modal-card">
+      <h3 class="modal-title">Get 5 more spins</h3>
+      <p class="modal-sub">$1.00 · charged once, added instantly</p>
+      <p class="modal-error" id="payError"></p>
+      <div id="paymentElement">Loading payment form…</div>
+      <div class="modal-actions">
+        <button class="cancel-btn" id="payCancel">Cancel</button>
+        <button class="pay-btn" id="payConfirm" disabled>Pay $1</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  el('payCancel').addEventListener('click', closePaymentModal);
+
+  try{
+    const res = await fetch(`${API_BASE}/api/create-payment-intent`, {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({visitorId: VISITOR_ID})
+    });
+    const data = await res.json();
+    if(!data.clientSecret) throw new Error(data.error || 'No client secret returned');
+
+    stripeElements = stripe.elements({clientSecret: data.clientSecret, appearance:{theme:'night', variables:{colorPrimary:'#D9AE3F'}}});
+    const paymentElement = stripeElements.create('payment');
+    paymentElement.mount('#paymentElement');
+    el('payConfirm').disabled = false;
+
+    el('payConfirm').addEventListener('click', async ()=>{
+      el('payConfirm').disabled = true;
+      el('payConfirm').textContent = 'Processing…';
+      const { error, paymentIntent } = await stripe.confirmPayment({
+        elements: stripeElements,
+        confirmParams: { return_url: window.location.href },
+        redirect: 'if_required'
+      });
+      if(error){
+        el('payError').textContent = error.message || 'Payment failed. Try again.';
+        el('payConfirm').disabled = false;
+        el('payConfirm').textContent = 'Pay $1';
+        return;
+      }
+      if(paymentIntent && paymentIntent.status === 'succeeded'){
+        el('payConfirm').textContent = 'Adding your spins…';
+        await pollForCredit();
+        closePaymentModal();
+        showToast('Payment received — 5 spins added!');
+        renderWheel();
+      }
+    });
+  } catch(err){
+    console.error(err);
+    el('paymentElement').textContent = "Couldn't load the payment form.";
+    el('payError').textContent = err.message;
+  }
+}
+
+function closePaymentModal(){
+  const overlay = el('payOverlay');
+  if(overlay) overlay.remove();
+  stripeElements = null;
+}
+
+async function pollForCredit(){
+  const before = state.paidSpins;
+  for(let i=0;i<6;i++){
+    await new Promise(r=>setTimeout(r, 1000));
+    await refreshStatus();
+    if(state.paidSpins > before) return;
+  }
+}
+
+function revealResult(flavorOrCategory){
+  let mode = state.mode;
+  if(mode === 'surprise'){
+    mode = Math.random() < 0.5 ? 'biz' : 'today';
+  }
+
+  let html = '';
+  if(mode === 'biz'){
+    const interestKey = state.answers.interest || pick(Object.keys(BIZ_IDEAS));
+    const idea = pick(BIZ_IDEAS[interestKey]);
+    const flavor = state.mode === 'biz' ? flavorOrCategory : pick(BIZ_FLAVORS);
+    const twist = BIZ_TWISTS[flavor];
+    const time = state.answers.time || 'flexible time';
+    const budget = state.answers.budget || 'any budget';
+    html = `
+      <div class="result">
+        <div class="flavor-tag">${flavor}</div>
+        <h3 class="idea-title">${idea.t}</h3>
+        <p class="idea-desc">${idea.d}</p>
+        <p class="idea-twist">${twist}</p>
+        <div class="idea-meta">TIME: ${time.toUpperCase()} · BUDGET: ${budget.toUpperCase()}</div>
+        <div class="result-actions">
+          <button class="again-btn" id="againBtn" ${totalSpins()<=0?'disabled':''}>Spin again</button>
+          <button class="start-over-btn" id="overBtn">Start over</button>
+        </div>
+      </div>
+    `;
+  } else {
+    const category = state.mode === 'today' ? flavorOrCategory : pick(TODAY_CATEGORIES);
+    const idea = pick(TODAY_IDEAS[category]);
+    const time = state.answers.time || 'some time';
+    const energy = state.answers.energy || 'whatever energy you\'ve got';
+    const social = state.answers.social || 'however you feel like it';
+    html = `
+      <div class="result">
+        <div class="flavor-tag">${category}</div>
+        <h3 class="idea-title">${idea}</h3>
+        <p class="idea-twist">Fits what you've got: ${time.toLowerCase()}, ${energy.toLowerCase()} energy, ${social.toLowerCase()}.</p>
+        <div class="result-actions">
+          <button class="again-btn" id="againBtn" ${totalSpins()<=0?'disabled':''}>Spin again</button>
+          <button class="start-over-btn" id="overBtn">Start over</button>
+        </div>
+      </div>
+    `;
+  }
+
+  el('resultZone').innerHTML = html;
+  el('againBtn').addEventListener('click', doSpin);
+  el('overBtn').addEventListener('click', ()=>{
+    state.mode = null;
+    state.step = 'mode';
+    state.answers = {};
+    state.qIndex = 0;
+    renderMode();
+  });
+}
+
+/* ---------------- INIT ---------------- */
+renderMode();
+</script>
+</body>
+</html>
