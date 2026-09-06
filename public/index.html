@@ -950,6 +950,7 @@ async function doSpin(){
       state.everSpun = true;
     } else {
       showToast("Looks like you're out of spins.");
+      openPaymentModal();
     }
   } catch(err){
     console.error(err);
