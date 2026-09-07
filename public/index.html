@@ -1139,6 +1139,8 @@ function revealResult(flavorOrCategory){
     const social = state.answers.social || 'however you feel like it';
     html = `
       <div class="result">
+      <div class="eyebrow">Wheel of Next has spoken</div>
+
         <div class="flavor-tag">${category}</div>
         <h3 class="idea-title">${idea}</h3>
         <p class="idea-twist">Fits what you've got: ${time.toLowerCase()}, ${energy.toLowerCase()} energy, ${social.toLowerCase()}.</p>
