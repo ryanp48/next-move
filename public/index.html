@@ -941,6 +941,14 @@ function renderWheel(){
   if(!state.statusLoaded) refreshStatus();
 
   el('spinBtn').addEventListener('click', doSpin);
+   el('wheelBackBtn').addEventListener('click', ()=>{
+    state.mode = null;
+    state.step = 'mode';
+    state.answers = {};
+    state.qIndex = 0;
+    renderMode();
+  });
+
   const buyBtn = el('buyBtn');
   if(buyBtn) buyBtn.addEventListener('click', openPaymentModal);
 }
