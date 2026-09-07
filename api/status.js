@@ -1,6 +1,8 @@
 const { withRedis } = require('./lib/redis')const FREE_SPINS = 2;
 
 module.exports = async (req, res) => {
+    res.setHeader('Cache-Control', 'no-store');
+
   const visitorId = req.query.visitorId;
   if (!visitorId) {
     res.status(400).json({ error: 'Missing visitorId' });
