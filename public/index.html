@@ -928,13 +928,15 @@ function renderWheel(){
     <div class="wheel-stage">
       ${buildWheelMarkup()}
       <button class="spin-btn" id="spinBtn">${total>0 ? 'Spin the wheel' : 'Out of spins'}</button>
-      <div class="buy-row">
+            <div class="buy-row">
         ${total<=0 ? `<button class="buy-btn" id="buyBtn">Buy 5 spins — $1</button>` : ``}
         <div class="demo-note">2 free spins on the house · then $1 for 5 more</div>
       </div>
+      <button class="back-link" id="wheelBackBtn">← start over</button>
     </div>
     <div id="resultZone"></div>
   `;
+
   updateTokenDisplay();
   if(!state.statusLoaded) refreshStatus();
 
