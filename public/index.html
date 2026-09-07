@@ -721,7 +721,8 @@ function totalSpins(){
 
 async function refreshStatus(){
   try{
-    const res = await fetch(`${API_BASE}/api/status?visitorId=${encodeURIComponent(VISITOR_ID)}`);
+        const res = await fetch(`${API_BASE}/api/status?visitorId=${encodeURIComponent(VISITOR_ID)}`, { cache: 'no-store' });
+
     const data = await res.json();
     state.freeRemaining = data.freeRemaining;
     state.paidSpins = data.paidSpins;
