@@ -763,14 +763,9 @@ function showToast(msg){
 function updateTokenDisplay(){
   const d = el('tokenDisplay');
   const total = totalSpins();
-  if(!state.everSpun && state.paidSpins === 0){
-    d.innerHTML = `<b>${state.freeRemaining}</b> <span style="opacity:.7">free spin${state.freeRemaining===1?'':'s'}</span>`;
-  } else if(total<=0){
-    d.innerHTML = `<b>0</b> spins left`;
-  } else {
-    d.innerHTML = `<b>${total}</b> spin${total===1?'':'s'} left`;
-  }
+  d.innerHTML = `<b>${total}</b> spin${total===1?'':'s'} left`;
 }
+
 
 /* ---------------- RENDER: MODE SELECT ---------------- */
 
