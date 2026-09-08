@@ -680,6 +680,194 @@ const TODAY_IDEAS = {
     "Do one thing today that mildly scares you in a good way."
   ]
 };
+const DATE_QUESTIONS = [
+  {key:'who', title:"Who's this for?", options:[["Flying solo","solo"],["Something new","new"],["My partner","partner"]]},
+  {key:'vibe', title:"What's the vibe tonight?", options:["Sweet & simple","Bold & flirty","Silly & playful"]},
+  {key:'setting', title:"Where are you?", options:["At home","Out and about"]}
+];
+
+const DATE_SOLO_CATEGORIES = ["Glow Up","Confidence","Indulge","Main Character","Adventure","Reflect","Flirt","Wildcard"];
+const DATE_SOLO_CATEGORIES_SHORT = ["GLOW UP","CONFIDENCE","INDULGE","MAIN CHAR","ADVENTURE","REFLECT","FLIRT","WILD"];
+const DATE_SOLO_IDEAS = {
+  "Glow Up":[
+    "Do a full at-home spa night — face mask, music, the works.",
+    "Try a new hairstyle or outfit you've been eyeing but haven't worn out yet.",
+    "Take twenty minutes to actually enjoy getting ready, no rushing.",
+    "Buy yourself the good version of something you usually skip.",
+    "Put on your favorite outfit just because — no occasion needed."
+  ],
+  "Confidence":[
+    "Write down three things you're genuinely proud of and read them out loud.",
+    "Practice walking into a room like you own it — even if it's just your kitchen.",
+    "Say one nice thing to yourself in the mirror and actually mean it.",
+    "List five things that make you a great catch.",
+    "Turn on your favorite song and dance like no one's watching."
+  ],
+  "Indulge":[
+    "Order the meal you actually want, no substitutions, no guilt.",
+    "Treat yourself to dessert first tonight.",
+    "Light a candle, pour a drink you like, and do absolutely nothing productive.",
+    "Watch the show or movie you've been 'saving' for a special night — tonight is that night.",
+    "Take a long bath or shower with your favorite music playing."
+  ],
+  "Main Character":[
+    "Go somewhere nice alone and act like the whole night is being filmed.",
+    "Take yourself on a proper date — nice spot, no phone.",
+    "Wear the outfit that makes you feel unstoppable, even if you're just staying in.",
+    "Write the opening scene of your own rom-com starting tonight.",
+    "Do one thing tonight purely because it makes you feel magnetic."
+  ],
+  "Adventure":[
+    "Say yes to the next spontaneous idea that pops into your head.",
+    "Explore a part of your city you've never actually been to.",
+    "Strike up a conversation with someone new tonight — low stakes, just see what happens.",
+    "Try a new bar, café, or restaurant solo — no waiting for company.",
+    "Take a walk with no destination and see where you end up."
+  ],
+  "Reflect":[
+    "Write a letter to the version of you a year from now.",
+    "Think about what you actually want in your next relationship — no pressure to act on it.",
+    "List what you've learned about yourself since your last relationship.",
+    "Journal about what makes you feel most confident.",
+    "Think of one thing you'd tell your past self about love."
+  ],
+  "Flirt":[
+    "Send a flirty text to someone you've been meaning to talk to.",
+    "Update your dating profile with your best, most confident photo.",
+    "Compliment a stranger today — genuinely, no agenda.",
+    "Swipe with intention tonight — message someone who actually caught your eye.",
+    "Practice your best opening line out loud, then actually use it."
+  ],
+  "Wildcard":[
+    "Do the thing you've been 'meaning to do' for weeks — tonight's the night.",
+    "Call an old friend and catch up properly.",
+    "Make a playlist that captures exactly how you want to feel this year.",
+    "Plan a trip you actually intend to take, even a small one.",
+    "Do something a little bold that only you will know about."
+  ]
+};
+
+const DATE_NEW_CATEGORIES = ["Spark","Question","Compliment","Tease","Connect","Curious","Bold Move","Wildcard"];
+const DATE_NEW_CATEGORIES_SHORT = ["SPARK","QUESTION","COMPLIMENT","TEASE","CONNECT","CURIOUS","BOLD MOVE","WILD"];
+const DATE_NEW_IDEAS = {
+  "Spark":[
+    "Ask them what first caught your attention about them.",
+    "Tell them one thing that made you want a second date.",
+    "Share your most embarrassing first-date story and let them share theirs.",
+    "Ask what they were nervous about before tonight.",
+    "Tell them the moment you decided you liked them."
+  ],
+  "Question":[
+    "Ask them what they're most passionate about outside of work.",
+    "Find out their idea of a perfect weekend.",
+    "Ask what they're proudest of this year.",
+    "Find out what they're looking for right now — no pressure, just curiosity.",
+    "Ask what makes them feel most like themselves."
+  ],
+  "Compliment":[
+    "Tell them something you already admire about them.",
+    "Point out one thing they do that stands out to you.",
+    "Tell them what you noticed about them before they said a word.",
+    "Compliment something about how they think, not just how they look.",
+    "Tell them one thing you hope they never change."
+  ],
+  "Tease":[
+    "Send a playful text mid-date, even if they're sitting right across from you.",
+    "Ask a slightly bold question and see how they answer.",
+    "Give them a hard time about something in a fun, flirty way.",
+    "Challenge them to guess three things about you — winner picks the next activity.",
+    "Tell a joke only the two of you would find funny by the end of the night."
+  ],
+  "Connect":[
+    "Find one thing you both have in common that surprised you.",
+    "Talk about a place you'd both love to travel to someday.",
+    "Share a small, low-stakes secret with each other.",
+    "Ask what a great second date would look like to them.",
+    "Talk about what 'a good time' means to each of you."
+  ],
+  "Curious":[
+    "Ask them what they thought of you the first time you met.",
+    "Find out one thing on their bucket list.",
+    "Ask what they'd do with a totally free day, no obligations.",
+    "Find out their most-used emoji and why.",
+    "Ask them to describe you in three words — then return the favor."
+  ],
+  "Bold Move":[
+    "Hold their hand for the first time tonight, if you haven't already.",
+    "Tell them you're having a great time — out loud, no games.",
+    "Ask if they'd like to do this again before the night ends.",
+    "Compliment them in a way that's a little more forward than usual.",
+    "Suggest one specific plan for next time, right now."
+  ],
+  "Wildcard":[
+    "Let them pick where the rest of the night goes.",
+    "Try the thing neither of you has done before — new restaurant, new activity.",
+    "Take a photo together to remember the night.",
+    "Ask each other a question you've never asked anyone on a first few dates.",
+    "End the night by telling them one thing you're looking forward to."
+  ]
+};
+
+const DATE_PARTNER_CATEGORIES = ["Eye Contact","Confession","Dare","Slow Down","Compliment","Tension","Closer","Wildcard"];
+const DATE_PARTNER_CATEGORIES_SHORT = ["EYE CONTACT","CONFESS","DARE","SLOW DOWN","COMPLIMENT","TENSION","CLOSER","WILD"];
+const DATE_PARTNER_IDEAS = {
+  "Eye Contact":[
+    "Hold eye contact for 30 seconds without laughing — loser buys dessert.",
+    "Stare into each other's eyes and try to guess what the other is thinking.",
+    "Lock eyes like you just met tonight — no talking for one full minute.",
+    "Hold eye contact while each of you says one thing you find attractive about the other.",
+    "Hold hands, hold eye contact, and don't look away until someone smiles."
+  ],
+  "Confession":[
+    "Tell them the exact moment you knew you liked them.",
+    "Admit one thing you find irresistible about them, out loud, right now.",
+    "Confess a small secret you've never told them.",
+    "Tell them what you thought the very first time you saw them.",
+    "Share the most attractive thing they've ever done without realizing it."
+  ],
+  "Dare":[
+    "Whisper something that makes them blush.",
+    "Give them a slow, teasing compliment before they can respond.",
+    "Trade one item of clothing for the next hour.",
+    "Feed each other a bite of dessert — no hands.",
+    "Send each other a flirty text from across the room."
+  ],
+  "Slow Down":[
+    "Turn off your phones and slow dance to one song, no talking.",
+    "Take turns describing your ideal night together in detail.",
+    "Sit close, no phones, and talk about your future for ten minutes.",
+    "Give each other a two-minute hand or shoulder massage.",
+    "Light a candle and just hold each other for a few minutes, no agenda."
+  ],
+  "Compliment":[
+    "Give three compliments they've never heard from you before.",
+    "Tell them the thing about them that made you fall harder.",
+    "Write down one thing you love about them and slide it across the table.",
+    "Compliment something about them that never gets praised.",
+    "Tell them exactly why tonight, with them, is where you want to be."
+  ],
+  "Tension":[
+    "Sit as close as possible without touching for one full minute.",
+    "Take turns whispering something flirty in each other's ear.",
+    "Trade a hug that lasts twice as long as normal.",
+    "Play three rounds of 'never have I ever' — flirty edition.",
+    "Ask them what they find most attractive about tonight so far."
+  ],
+  "Closer":[
+    "End the night with a slow dance in the kitchen, lights low.",
+    "Hold hands and don't let go for the rest of the night.",
+    "Trade one thing you're nervous to admit you want more of.",
+    "Cuddle up and take turns sharing a favorite memory together.",
+    "Plan your next date together right now, in detail."
+  ],
+  "Wildcard":[
+    "Let them pick the next move tonight — no questions asked.",
+    "Flip a coin: winner picks what happens for the next hour.",
+    "Do the opposite of your usual routine tonight — surprise each other.",
+    "Text each other something flirty, pretending you're strangers.",
+    "Recreate your first date, right now, wherever you are."
+  ]
+};
 
 /* ---------------- CONFIG ---------------- */
 
