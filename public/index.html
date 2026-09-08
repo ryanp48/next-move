@@ -1048,14 +1048,35 @@ function renderQuiz(){
 
 /* ---------------- RENDER: WHEEL ---------------- */
 
+function dateCategoriesFor(){
+  const who = state.answers.who;
+  if(who === 'solo') return DATE_SOLO_CATEGORIES;
+  if(who === 'new') return DATE_NEW_CATEGORIES;
+  return DATE_PARTNER_CATEGORIES;
+}
+function dateCategoriesShortFor(){
+  const who = state.answers.who;
+  if(who === 'solo') return DATE_SOLO_CATEGORIES_SHORT;
+  if(who === 'new') return DATE_NEW_CATEGORIES_SHORT;
+  return DATE_PARTNER_CATEGORIES_SHORT;
+}
+function dateIdeasFor(){
+  const who = state.answers.who;
+  if(who === 'solo') return DATE_SOLO_IDEAS;
+  if(who === 'new') return DATE_NEW_IDEAS;
+  return DATE_PARTNER_IDEAS;
+}
 function currentSegments(){
   if(state.mode === 'biz') return BIZ_FLAVORS;
+  if(state.mode === 'date') return dateCategoriesFor();
   return TODAY_CATEGORIES;
 }
 function currentShortSegments(){
   if(state.mode === 'biz') return BIZ_FLAVORS_SHORT;
+  if(state.mode === 'date') return dateCategoriesShortFor();
   return TODAY_CATEGORIES_SHORT;
 }
+
 
 function buildWheelSVG(){
   const fullSegs = currentSegments();
