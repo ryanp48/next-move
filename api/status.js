@@ -1,4 +1,5 @@
-const { withRedis } = require('./lib/redis')const FREE_SPINS = 2;
+const { withRedis } = require('./lib/redis');
+const FREE_SPINS = 2;
 
 module.exports = async (req, res) => {
     res.setHeader('Cache-Control', 'no-store');
