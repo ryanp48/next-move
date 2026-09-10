@@ -1064,7 +1064,7 @@ function dateCategoriesShortFor(){
 }
 function dateIdeasFor(){
   const who = state.answers.who;
-  if(who === 'solo') return DATE_SOLO_IDEAS;
+    if(who === 'group') return DATE_GROUP_CATEGORIES_SHORT;
   if(who === 'new') return DATE_NEW_IDEAS;
   return DATE_PARTNER_IDEAS;
 }
