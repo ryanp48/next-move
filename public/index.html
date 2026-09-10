@@ -1052,7 +1052,7 @@ function renderQuiz(){
 
 function dateCategoriesFor(){
   const who = state.answers.who;
-  if(who === 'solo') return DATE_SOLO_CATEGORIES;
+    if(who === 'group') return DATE_GROUP_CATEGORIES;
   if(who === 'new') return DATE_NEW_CATEGORIES;
   return DATE_PARTNER_CATEGORIES;
 }
