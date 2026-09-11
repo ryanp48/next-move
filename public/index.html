@@ -1007,7 +1007,7 @@ function renderMode(){
 /* ---------------- RENDER: QUIZ ---------------- */
 
 function renderQuiz(){
-  const questions = state.mode === 'biz' ? BIZ_QUESTIONS : TODAY_QUESTIONS;
+  const questions = state.mode === 'biz' ? BIZ_QUESTIONS : state.mode === 'date' ? DATE_QUESTIONS : TODAY_QUESTIONS;
   const q = questions[state.qIndex];
 
   el('heroTitle').innerHTML = state.mode === 'biz' ? `Let's shape the <em>idea</em>.` : `Let's shape the <em>day</em>.`;
